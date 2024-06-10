@@ -25,15 +25,17 @@ const espectadoresEjemplo = [
   },
 ];
 
+let espectadoresGuardados = [];
+
 describe(`GET ${baseUrl}`, () => {
   beforeEach(async () => {
     await Espectador.deleteMany({});
 
     const espectador1 = new Espectador(espectadoresEjemplo[0]);
-    await espectador1.save();
+    espectadoresGuardados.push(await espectador1.save());
 
     const espectador2 = new Espectador(espectadoresEjemplo[1]);
-    await espectador2.save();
+    espectadoresGuardados.push(await espectador2.save());
   });
 
   test('Debería regresar con todos los espectadores registrados', async () => {
@@ -44,7 +46,20 @@ describe(`GET ${baseUrl}`, () => {
     expect(response.body['data']).toHaveLength(espectadoresEjemplo.length);
   });
 
+  test('Debería regresar un espectador por id', async () => {
+    const response = await request.get(
+      `${baseUrl}/${espectadoresGuardados[0]._id}`
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body['data']).toBeTruthy();
+    expect(response.body['data']._id).toEqual(
+      espectadoresGuardados[0]._id.toString()
+    );
+  });
+
   afterEach(async () => {
+    espectadoresGuardados = [];
     await Espectador.deleteMany({});
   });
 });
@@ -54,6 +69,20 @@ describe(`POST ${baseUrl}`, () => {
     const response = await request.post(baseUrl).send(espectadoresEjemplo[0]);
 
     expect(response.status).toEqual(200);
+  });
+
+  test('Debería fallar al recibir body vacío', async () => {
+    const response = await request.post(baseUrl).send();
+
+    expect(response.status).toEqual(400);
+  });
+
+  test('Debería fallar al recibir objeto con falta de propiedades', async () => {
+    const response = await request
+      .post(baseUrl)
+      .send({ name: 'José', apellido: 'Moca' });
+
+    expect(response.status).toEqual(400);
   });
 
   afterEach(async () => {
