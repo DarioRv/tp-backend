@@ -10,5 +10,5 @@ const productoSchema = new Schema({
   destacado: { type: Boolean, required: true },
 });
 
-module.exports =
-  mongoose.models.Producto || mongoose.model('Producto', productoSchema);
+const Producto = mongoose.model('Producto', productoSchema);
+module.exports = Producto;
