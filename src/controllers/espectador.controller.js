@@ -1,12 +1,12 @@
 const EspectadorModel = require('../models/espectador.model');
-const userController = {};
+const espectadorController = {};
 
-userController.getAll = async (req, res) => {
+espectadorController.getAll = async (req, res) => {
   const espectadores = await EspectadorModel.find();
   res.json({ data: espectadores });
 };
 
-userController.getById = async (req, res) => {
+espectadorController.getById = async (req, res) => {
   const id = req.params.id;
   if (!id && !isValidObjectId(id)) {
     return res.status(400).json({
@@ -26,7 +26,7 @@ userController.getById = async (req, res) => {
   }
 };
 
-userController.create = async (req, res) => {
+espectadorController.create = async (req, res) => {
   const espectador = new EspectadorModel(req.body);
 
   try {
@@ -41,7 +41,7 @@ userController.create = async (req, res) => {
   }
 };
 
-userController.deleteById = async (req, res) => {
+espectadorController.deleteById = async (req, res) => {
   const id = req.params.id;
   if (!id && !isValidObjectId(id)) {
     return res.status(400).json({
@@ -61,4 +61,4 @@ userController.deleteById = async (req, res) => {
   }
 };
 
-module.exports = userController;
+module.exports = espectadorController;
