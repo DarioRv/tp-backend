@@ -16,8 +16,8 @@ userController.getById = async (req, res) => {
   }
 
   try {
-    const espectador = await EspectadorModel.findById();
-    res.json(espectador);
+    const espectador = await EspectadorModel.findById(id);
+    res.json({ data: espectador });
   } catch (err) {
     res.status(404).json({
       status: '404',
