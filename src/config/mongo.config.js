@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/tp-back';
+import { MONGO_URL } from './config';
 
 async function connectToDatabase() {
   try {
-    await mongoose.connect(URI);
+    await mongoose.connect(MONGO_URL);
     console.log('Conexión exitosa con la base de datos');
   } catch (err) {
     console.error('Error de conexión con la base de datos:', err);

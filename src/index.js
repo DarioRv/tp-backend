@@ -4,12 +4,11 @@ const cors = require('cors');
 const espectadorRouter = require('./routes/espectador.route');
 const productoRouter = require('./routes/producto.route');
 const connectToDB = require('./config/mongo.config');
+import { PORT } from './config/config';
 
 /* --- */
 
 connectToDB();
-
-const port = process.env.PORT || 3000;
 const app = express();
 
 app.use(express.json());
@@ -24,8 +23,8 @@ app.get('/', async (req, res) => {
 
 /* --- */
 
-const server = app.listen(port, () => {
-  console.log('Servidor corriendo en el puerto: http://localhost:' + port);
+const server = app.listen(PORT, () => {
+  console.log('Servidor corriendo en el puerto: http://localhost:' + PORT);
 });
 
 module.exports = { app, server }; // -> MIDU DIOS
