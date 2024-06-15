@@ -4,6 +4,7 @@ const supertest = require('supertest');
 const request = supertest(app);
 const Espectador = require('../models/espectador.model');
 const Producto = require('../models/producto.model');
+const Ticket = require('../models/ticket.model');
 
 const closeServerAndDBConnection = async () => {
   await mongoose.connection.close();
@@ -255,6 +256,174 @@ describe(`DELETE ${baseUrlProductos}`, () => {
     const response = await request.delete(`${baseUrlProductos}/dafasdd123a@`);
 
     expect(response.status).toBe(404);
+  });
+});
+
+/* Tests de tickets */
+
+const baseUrlTickets = '/api/v1/tickets';
+
+const ticketsEjemplo = [
+  {
+    precio: 100,
+    categoriaEspectador: 'e',
+  },
+  {
+    precio: 200,
+    categoriaEspectador: 'l',
+  },
+  {
+    precio: 300,
+    categoriaEspectador: 'e',
+  },
+];
+let ticketsGuardados = [];
+
+describe(`GET ${baseUrlTickets}`, () => {
+  beforeEach(async () => {
+    await Ticket.deleteMany({});
+    await Espectador.deleteMany({});
+
+    for (const ticket of ticketsEjemplo) {
+      const espectadorGuardado = await Espectador.create(
+        espectadoresEjemplo[0]
+      );
+      const ticketGuardado = await Ticket.create({
+        ...ticket,
+        espectador: espectadorGuardado._id,
+      });
+      ticketsGuardados.push(ticketGuardado);
+    }
+  });
+
+  test('Debería regresar todos los tickets', async () => {
+    const response = await request.get(baseUrlTickets);
+
+    expect(response.status).toEqual(200);
+    expect(response.body['data']).toBeTruthy();
+    expect(response.body['data']).toHaveLength(ticketsEjemplo.length);
+  });
+
+  test('Debería regresar todos los tickets de categoría extranjero', async () => {
+    const response = await request.get(`${baseUrlTickets}?categoria=e`);
+
+    expect(response.status).toEqual(200);
+    expect(response.body['data']).toBeTruthy();
+    expect(response.body['data']).toHaveLength(
+      structuredClone(ticketsEjemplo).filter(
+        (e) => e.categoriaEspectador == 'e'
+      ).length
+    );
+  });
+
+  test('Debería regresar todos los tickets de categoría local', async () => {
+    const response = await request.get(`${baseUrlTickets}?categoria=l`);
+
+    expect(response.status).toEqual(200);
+    expect(response.body['data']).toBeTruthy();
+    expect(response.body['data']).toHaveLength(
+      structuredClone(ticketsEjemplo).filter(
+        (e) => e.categoriaEspectador == 'l'
+      ).length
+    );
+  });
+
+  afterEach(async () => {
+    await Ticket.deleteMany({});
+    await Espectador.deleteMany({});
+  });
+});
+
+describe(`POST ${baseUrlTickets}`, () => {
+  test('Debería guardar un ticket', async () => {
+    const espectadorGuardado = await Espectador.create(espectadoresEjemplo[0]);
+
+    const response = await request
+      .post(baseUrlTickets)
+      .send({ ...ticketsEjemplo[0], espectador: espectadorGuardado._id });
+
+    expect(response.status).toBe(201);
+    expect(response.body['data']).toBeTruthy();
+  });
+
+  test('Debería fallar al recibir body vacío', async () => {
+    const response = await request.post(baseUrlTickets).send();
+
+    expect(response.status).toBe(400);
+  });
+
+  test('Debería fallar al recibir objeto con falta de propiedades', async () => {
+    const response = await request.post(baseUrlTickets).send({ precio: 100 });
+
+    expect(response.status).toBe(400);
+  });
+
+  afterEach(async () => {
+    await Ticket.deleteMany({});
+    await Espectador.deleteMany({});
+  });
+});
+
+describe(`PATCH ${baseUrlTickets}`, () => {
+  test('Debería actualizar un ticket', async () => {
+    const espectadorGuardado = await Espectador.create(espectadoresEjemplo[0]);
+    const ticketGuardado = await Ticket.create({
+      ...ticketsEjemplo[0],
+      espectador: espectadorGuardado._id,
+    });
+    const ticketActualizado = {
+      ...ticketGuardado.toObject(),
+      precio: 900,
+    };
+
+    const response = await request
+      .patch(baseUrlTickets)
+      .send(ticketActualizado);
+
+    expect(response.status).toBe(200);
+    expect(response.body['data']).toBeTruthy();
+    expect(response.body['data'].precio).toBe(ticketActualizado.precio);
+  });
+
+  test('Debería fallar al actualizar un ticket con id inexistente', async () => {
+    const response = await request
+      .patch(baseUrlTickets)
+      .send({ ...ticketsGuardados[0], _id: '123' });
+
+    expect(response.status).toBe(404);
+  });
+
+  afterEach(async () => {
+    await Ticket.deleteMany({});
+    await Espectador.deleteMany({});
+  });
+});
+
+describe(`DELETE ${baseUrlTickets}`, () => {
+  test('Debería eliminar un ticket por id', async () => {
+    const espectadorGuardado = await Espectador.create(espectadoresEjemplo[0]);
+    const ticketGuardado = await Ticket.create({
+      ...ticketsEjemplo[0],
+      espectador: espectadorGuardado._id,
+    });
+
+    const response = await request.delete(
+      `${baseUrlTickets}/${ticketGuardado._id}`
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.body['data']).toBeTruthy();
+  });
+
+  test('Debería fallar al eliminar un ticket con id inexistente', async () => {
+    const response = await request.delete(`${baseUrlTickets}/dafasdd123a@`);
+
+    expect(response.status).toBe(404);
+  });
+
+  afterEach(async () => {
+    await Ticket.deleteMany({});
+    await Espectador.deleteMany({});
   });
 });
 

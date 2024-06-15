@@ -7,4 +7,6 @@ const ticketSchema = new Schema({
   espectador: { type: Schema.ObjectId, ref: 'Espectador' },
 });
 
-module.exports = mongoose.model('Ticket', ticketSchema);
+const Ticket = mongoose.model('Ticket', ticketSchema);
+
+module.exports = Ticket;

@@ -3,6 +3,7 @@ const cors = require('cors');
 
 const espectadorRouter = require('./routes/espectador.route');
 const productoRouter = require('./routes/producto.route');
+const ticketRouter = require('./routes/ticket.route');
 const connectToDB = require('./config/mongo.config');
 const PORT = 3000;
 
@@ -16,6 +17,7 @@ app.use(cors({ origin: 'http://localhost:4200' }));
 
 app.use('/api/v1/espectadores', espectadorRouter);
 app.use('/api/v1/productos', productoRouter);
+app.use('/api/v1/tickets', ticketRouter);
 
 app.get('/', async (req, res) => {
   res.send('Bienvenido a mi primer RESTful API');
