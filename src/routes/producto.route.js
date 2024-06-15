@@ -7,6 +7,6 @@ router.get('/', productoController.getAll);
 router.get('/featured', productoController.getFeatured);
 router.post('/', productoController.create);
 router.patch('/', productoController.update);
-router.delelte('/:id', productoController.deleteById);
+router.delete('/:id', productoController.deleteById);
 
 module.exports = router;

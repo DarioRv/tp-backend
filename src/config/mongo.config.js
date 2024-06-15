@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-import { MONGO_URL } from './config';
+const MONGO_URL = 'mongodb://localhost:27017/tp-back';
 
 async function connectToDatabase() {
   try {

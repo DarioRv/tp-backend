@@ -18,7 +18,7 @@ productoController.create = async (req, res) => {
 
   try {
     const productoGuardado = await producto.save();
-    res.json({ data: productoGuardado });
+    res.status(201).json({ data: productoGuardado });
   } catch (err) {
     res.status(400).json({
       status: '400',
@@ -28,18 +28,23 @@ productoController.create = async (req, res) => {
 };
 
 productoController.update = async (req, res) => {
-  const producto = req.body;
+  const id = req.body._id;
+  if (!id && !isValidObjectId(id)) {
+    return res.status(400).json({
+      status: '400',
+      message: 'El ID no es válido',
+    });
+  }
 
   try {
-    const productoActualizado = await ProductoModel.findOneAndUpdate(
-      { _id: producto._id },
-      { ...producto }
-    );
-    res.json({ data: productoActualizado });
+    const producto = await ProductoModel.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    res.json({ data: producto });
   } catch (err) {
-    res.status(400).json({
-      status: '400',
-      message: 'Error al actualizar el producto',
+    res.status(404).json({
+      status: '404',
+      message: `No se ha podido actualizar el producto con el id '${id}'`,
     });
   }
 };

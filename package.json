@@ -2,7 +2,7 @@
   "name": "tp-backend",
   "main": "./src/index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test jest --testTimeout=10000 --verbose --silent",
+    "test": "cross-env NODE_ENV=test jest --testTimeout=5000 --verbose --silent --detectOpenHandles",
     "test:watch": "npm run test -- --watchAll",
     "start": "node ./src/index.js",
     "start:dev": "nodemon --watch src src/index.js"

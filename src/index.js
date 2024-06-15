@@ -4,7 +4,7 @@ const cors = require('cors');
 const espectadorRouter = require('./routes/espectador.route');
 const productoRouter = require('./routes/producto.route');
 const connectToDB = require('./config/mongo.config');
-import { PORT } from './config/config';
+const PORT = 3000;
 
 /* --- */
 
