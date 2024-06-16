@@ -10,6 +10,6 @@ const transaccionSchema = new Schema({
   tasaConversion: { type: Number, required: true },
 });
 
-module.exports =
-  mongoose.models.Transaccion ||
-  mongoose.model('Transaccion', transaccionSchema);
+const Transaccion = mongoose.model('Transaccion', transaccionSchema);
+
+module.exports = Transaccion;

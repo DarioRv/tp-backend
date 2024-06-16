@@ -5,6 +5,7 @@ const request = supertest(app);
 const Espectador = require('../models/espectador.model');
 const Producto = require('../models/producto.model');
 const Ticket = require('../models/ticket.model');
+const Transaccion = require('../models/transaccion.model');
 
 const closeServerAndDBConnection = async () => {
   await mongoose.connection.close();
@@ -424,6 +425,103 @@ describe(`DELETE ${baseUrlTickets}`, () => {
   afterEach(async () => {
     await Ticket.deleteMany({});
     await Espectador.deleteMany({});
+  });
+});
+
+/* Tests de transacciones */
+
+const baseUrlTransacciones = '/api/v1/transacciones';
+
+const transaccionesEjemplo = [
+  {
+    monedaOrigen: 'USD-EEUU',
+    cantidadOrigen: 100,
+    monedaDestino: 'PEN-PERU',
+    cantidadDestino: 380,
+    emailCliente: 'juan@email.com',
+    tasaConversion: 3.8,
+  },
+  {
+    monedaOrigen: 'ARS-ARGENTINA',
+    cantidadOrigen: 20000,
+    monedaDestino: 'PEN',
+    cantidadDestino: 10000,
+    emailCliente: 'pedro@email.com',
+    tasaConversion: 0.5,
+  },
+  {
+    monedaOrigen: 'BRL-BRASIL',
+    cantidadOrigen: 30,
+    monedaDestino: 'USD-EEUU',
+    cantidadDestino: 5,
+    emailCliente: 'neymar@email.com',
+    tasaConversion: 0.16,
+  },
+];
+let transaccionesGuardadas = [];
+
+describe(`GET ${baseUrlTransacciones}`, () => {
+  beforeEach(async () => {
+    await Transaccion.deleteMany({});
+
+    for (const transaccion of transaccionesEjemplo) {
+      const transaccionGuardada = await Transaccion.create(transaccion);
+      transaccionesGuardadas.push(transaccionGuardada);
+    }
+  });
+
+  test('Debería regresar todas las transacciones', async () => {
+    const response = await request.get(baseUrlTransacciones);
+
+    expect(response.status).toEqual(200);
+    expect(response.body['data']).toBeTruthy();
+    expect(response.body['data']).toHaveLength(transaccionesEjemplo.length);
+  });
+
+  test('Debería regresar todas las transacciones de un cliente', async () => {
+    const response = await request.get(
+      `${baseUrlTransacciones}?emailCliente=${transaccionesEjemplo[0].emailCliente}`
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.body['data']).toBeTruthy();
+    expect(response.body['data']).toHaveLength(
+      structuredClone(transaccionesEjemplo).filter(
+        (e) => e.emailCliente == transaccionesEjemplo[0].emailCliente
+      ).length
+    );
+  });
+
+  test('Debería regresar todas las transacciones de una moneda a otra', async () => {
+    const response = await request.get(
+      `${baseUrlTransacciones}?monedaOrigen=${transaccionesEjemplo[0].monedaOrigen}&monedaDestino=${transaccionesEjemplo[0].monedaDestino}`
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.body['data']).toBeTruthy();
+    expect(response.body['data']).toHaveLength(
+      structuredClone(transaccionesEjemplo).filter(
+        (e) =>
+          e.monedaOrigen == transaccionesEjemplo[0].monedaOrigen &&
+          e.monedaDestino == transaccionesEjemplo[0].monedaDestino
+      ).length
+    );
+  });
+
+  afterEach(async () => {
+    transaccionesGuardadas = [];
+    await Transaccion.deleteMany({});
+  });
+});
+
+describe(`POST ${baseUrlTransacciones}`, () => {
+  test('Debería guardar una transacción', async () => {
+    const response = await request
+      .post(baseUrlTransacciones)
+      .send(transaccionesEjemplo[0]);
+
+    expect(response.status).toBe(201);
+    expect(response.body['data']).toBeTruthy();
   });
 });
 
