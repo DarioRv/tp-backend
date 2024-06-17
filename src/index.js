@@ -5,6 +5,7 @@ const espectadorRouter = require('./routes/espectador.route');
 const productoRouter = require('./routes/producto.route');
 const ticketRouter = require('./routes/ticket.route');
 const transaccionRouter = require('./routes/transaccion.route');
+const { ejecutarSeed, limpiarDB } = require('./seed');
 const connectToDB = require('./config/mongo.config');
 const PORT = 3000;
 
@@ -22,7 +23,17 @@ app.use('/api/v1/tickets', ticketRouter);
 app.use('/api/v1/transacciones', transaccionRouter);
 
 app.get('/', async (req, res) => {
-  res.send('Bienvenido a mi primer RESTful API');
+  res.json('Bienvenido a mi primer RESTful API');
+});
+
+app.use('/api/v1/seed', async (req, res) => {
+  await ejecutarSeed();
+  res.json({ data: 'Base de datos rellenada con datos de prueba' });
+});
+
+app.use('/api/v1/clean', async (req, res) => {
+  await limpiarDB();
+  res.json({ data: 'Base de datos limpiada' });
 });
 
 /* --- */
